@@ -1,0 +1,52 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysqlvolume
+  labels:
+    app: mysqlvolume
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp2
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysqldeployment
+  labels:
+    app: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+      containers:
+        - name: mysql
+          image: saireddy.jfrog.io/mydocker/mysql:1.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: saireddy
+            - name: MYSQL_DATABASE
+              value: saireddy
+            - name: MYSQL_USER
+              value: saireddy
+            - name: MYSQL_PASSWORD
+              value: saireddy
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysqlpvc
+              mountPath: /var/lib/mysql
+      imagepullsecrets:
+        - name: downloading
+      volumes:
+        - name: mysqlpvc
+          persistentVolumeClaim:
+            claimName: mysqlvolume
